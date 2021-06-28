@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 // Схема пользователя
 const userSchema = new mongoose.Schema({
@@ -19,4 +19,4 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 });
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('user', userSchema);

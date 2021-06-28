@@ -1,12 +1,7 @@
-const User = require("../models/user.js");
-const { handleDefualtError } = require("./errorHandlers");
-const {
-  ERR_400,
-  ERR_404,
-  ERR_500,
-  ID_LENGTH,
-  errorMessages,
-} = require("../utils/constants");
+/* eslint-disable consistent-return */
+const User = require('../models/user');
+const { handleDefualtError } = require('./errorHandlers');
+const { ERR_400, ERR_404, errorMessages } = require('../utils/constants');
 
 // Создание пользователя
 const createUser = (req, res) => {
@@ -14,10 +9,10 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERR_400).send(errorMessages.usersPost400);
       }
-      handleDefualtError(req, res);
+      return handleDefualtError(req, res);
     });
 };
 
@@ -25,9 +20,7 @@ const createUser = (req, res) => {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => {
-      handleDefualtError(req, res);
-    });
+    .catch(() => handleDefualtError(req, res));
 };
 
 // Получение пользователя по ID
@@ -35,28 +28,25 @@ const getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(ERR_404).send(errorMessages.usersIdGet);
+        return res.status(ERR_400).send(errorMessages.usersIdGet);
       }
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        return res.status(ERR_404).send(errorMessages.usersIdGet);
+      if (err.name === 'CastError') {
+        return res.status(ERR_400).send(errorMessages.usersIdGet);
       }
-      handleDefualtError(req, res);
+      return handleDefualtError(req, res);
     });
 };
 
 // Обновление даных пользователя
 const updateUser = (req, res) => {
-  if (req.user._id.length != ID_LENGTH) {
-    return res.status(ERR_404).send(errorMessages.usersMePatch404);
-  }
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
-    { new: true, runValidators: true, upsert: false }
+    { new: true, runValidators: true, upsert: false },
   )
     .then((user) => {
       if (!user) {
@@ -65,23 +55,23 @@ const updateUser = (req, res) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERR_400).send(errorMessages.usersMeAvatarPatch400);
       }
-      handleDefualtError(req, res);
+      if (err.name === 'CastError') {
+        return res.status(ERR_400).send(errorMessages.usersMePatch400);
+      }
+      return handleDefualtError(req, res);
     });
 };
 
 // Обновление аватара пользователя
 const updateAvatar = (req, res) => {
-  if (req.user._id.length != ID_LENGTH) {
-    return res.status(ERR_404).send(errorMessages.usersMeAvatarPatch404);
-  }
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
-    { new: true, runValidators: true, upsert: false }
+    { new: true, runValidators: true, upsert: false },
   )
     .then((user) => {
       if (!user) {
@@ -90,10 +80,13 @@ const updateAvatar = (req, res) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERR_400).send(errorMessages.usersMeAvatarPatch400);
       }
-      handleDefualtError(req, res);
+      if (err.name === 'CastError') {
+        return res.status(ERR_400).send(errorMessages.usersMePatch400);
+      }
+      return handleDefualtError(req, res);
     });
 };
 
