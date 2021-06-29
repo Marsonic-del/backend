@@ -34,7 +34,7 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(ERR_400).send(errorMessages.cardsDelete400);
+        return res.status(ERR_404).send(errorMessages.cardsDelete400);
       }
       res.send({ message: 'Карточка удалена' });
     })
