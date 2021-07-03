@@ -16,11 +16,7 @@ const createUser = (req, res) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
-      res.send({
-        data: {
-          name: user.name, about: user.about, avatar: user.avatar, email: user.email, _id: user._id,
-        },
-      });
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -118,11 +114,7 @@ const getUserInfo = (req, res) => {
   const userId = req.user._id;
   User.findById(userId)
     .then((user) => {
-      res.send({
-        data: {
-          name: user.name, about: user.about, avatar: user.avatar, email: user.email, _id: user._id,
-        },
-      });
+      res.send({ data: user });
     })
     .catch((err) => res.status(403).send(err.message));
 };
