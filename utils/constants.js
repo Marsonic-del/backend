@@ -1,7 +1,9 @@
 // Константные значения кодов ошибок
 const ERR_400 = 400;
+const ERR_401 = 401;
 const ERR_404 = 404;
 const ERR_500 = 500;
+const SECRET_KEY = 'some-secret-key';
 
 // Обьекты с описанием ошибки
 const errorMessages = {
@@ -48,7 +50,9 @@ const errorMessages = {
 
 module.exports = {
   ERR_400,
+  ERR_401,
   ERR_404,
   ERR_500,
+  SECRET_KEY,
   errorMessages,
 };
