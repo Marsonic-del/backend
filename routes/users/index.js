@@ -8,8 +8,6 @@ const {
   getUserInfo,
 } = require('../../controllers/users');
 
-users.use('/', require('../../middlewares/auth'));
-
 users.get('/', getUsers);
 // возвращает информацию о текущем пользователе
 users.get('/me', getUserInfo);

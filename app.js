@@ -20,6 +20,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.post('/signin', login);
 app.post('/signup', createUser);
-app.use('/', routes);
+app.use('/', require('./middlewares/auth'), routes);
 
 app.listen(PORT);
