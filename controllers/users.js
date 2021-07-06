@@ -1,13 +1,16 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { handleDefualtError } = require('./errorHandlers');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { NotValidDataError } = require('../errors/NotValidDataError');
+const { ExistedEmailError } = require('../errors/ExistedEmailError');
+const { DefaultServerError } = require('../errors/DefaultServerError');
 const {
-  ERR_400, ERR_404, ERR_401, SECRET_KEY, errorMessages,
+  SECRET_KEY, errorMessages,
 } = require('../utils/constants');
 
 // Создание пользователя
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -20,38 +23,44 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERR_400).send(errorMessages.usersPost400);
+        throw new NotValidDataError(errorMessages.usersPost400);
       }
-      return handleDefualtError(req, res);
-    });
+      if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ExistedEmailError(errorMessages.notValidEmail409);
+      }
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 // Получение всех пользователей
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => handleDefualtError(req, res));
+    .catch(() => { throw new DefaultServerError(errorMessages.defaultMessage500); })
+    .catch(next);
 };
 
 // Получение пользователя по ID
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res.status(ERR_400).send(errorMessages.usersIdGet);
+        next(new NotValidDataError(errorMessages.usersIdGet));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_400).send(errorMessages.usersIdGet);
+        throw new NotValidDataError(errorMessages.usersIdGet);
       }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 // Обновление даных пользователя
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -60,23 +69,21 @@ const updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(ERR_404).send(errorMessages.usersMePatch404);
+        next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(ERR_400).send(errorMessages.usersMeAvatarPatch400);
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        throw new NotValidDataError(errorMessages.usersMePatch400);
       }
-      if (err.name === 'CastError') {
-        return res.status(ERR_400).send(errorMessages.usersMePatch400);
-      }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 // Обновление аватара пользователя
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -85,38 +92,40 @@ const updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(ERR_404).send(errorMessages.usersMeAvatarPatch404);
+        throw new NotFoundError(errorMessages.usersMeAvatarPatch404);
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERR_400).send(errorMessages.usersMeAvatarPatch400);
+        throw new NotValidDataError(errorMessages.usersMeAvatarPatch400);
       }
       if (err.name === 'CastError') {
-        return res.status(ERR_400).send(errorMessages.usersMePatch400);
+        throw new NotValidDataError(errorMessages.usersMePatch400);
       }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch((err) => res.status(ERR_401).send(err.message));
+    .catch(next);
 };
 
-const getUserInfo = (req, res) => {
+const getUserInfo = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .then((user) => {
       res.send({ data: user });
     })
-    .catch((err) => res.status(403).send(err.message));
+    .catch(() => { throw new DefaultServerError(errorMessages.defaultMessage500); })
+    .catch(next);
 };
 
 module.exports = {

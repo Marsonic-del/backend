@@ -5,7 +5,7 @@ const { SECRET_KEY } = require('../utils/constants');
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    return res.status(403).send({ message: 'Необходима авторизация' });
   }
   // извлечём токен
   const token = JSON.parse(authorization.replace('Bearer ', ''));
@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
   } catch (err) {
     // отправим ошибку, если не получилось
     return res
-      .status(401)
+      .status(403)
       .send({ message: 'Необходима авторизация' });
   }
   req.user = payload; // записываем пейлоуд в объект запроса

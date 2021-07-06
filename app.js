@@ -22,4 +22,10 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 app.use('/', require('./middlewares/auth'), routes);
 
+// здесь обрабатываем все ошибки
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
+
 app.listen(PORT);

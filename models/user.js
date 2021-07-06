@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { errorMessages } = require('../utils/constants');
+const { NotValidDataError } = require('../errors/NotValidDataError');
 
 // Схема пользователя
 const userSchema = new mongoose.Schema({
@@ -43,20 +45,21 @@ const userSchema = new mongoose.Schema({
 
 // добавим метод findUserByCredentials схеме пользователя
 // у него будет два параметра — почта и пароль
+// eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
   // попытаемся найти пользовател по почте
   return this.findOne({ email }).select('+password') // this — это модель User
     .then((user) => {
       // не нашёлся — отклоняем промис
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        throw new NotValidDataError(errorMessages.notValidEmailOrPassword);
       }
 
       // нашёлся — сравниваем хеши
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            throw new NotValidDataError(errorMessages.notValidEmailOrPassword);
           }
           return user;
         });

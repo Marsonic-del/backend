@@ -1,17 +1,20 @@
 /* eslint-disable consistent-return */
 const Card = require('../models/card');
-const { handleDefualtError } = require('./errorHandlers');
-const { ERR_400, ERR_404, errorMessages } = require('../utils/constants');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { NotValidDataError } = require('../errors/NotValidDataError');
+const { DefaultServerError } = require('../errors/DefaultServerError');
+const { errorMessages } = require('../utils/constants');
 
 // Получаем все карточки
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((card) => res.send({ data: card }))
-    .catch(() => handleDefualtError(req, res));
+    .catch(() => { throw new DefaultServerError(errorMessages.defaultMessage500); })
+    .catch(next);
 };
 
 // Создание карточки
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({
     name,
@@ -23,31 +26,33 @@ const createCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(ERR_400).send(errorMessages.cardsPost400);
+        throw new NotValidDataError(errorMessages.cardsPost400);
       }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 // Удаление карточки
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(ERR_404).send(errorMessages.cardsDelete400);
+        next(new NotFoundError(errorMessages.cardsDelete400));
       }
       res.send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_400).send(errorMessages.cardsDelete400);
+        throw new NotValidDataError(errorMessages.cardsDelete400);
       }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 // Установка лайка
-const putLike = (req, res) => {
+const putLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -56,20 +61,22 @@ const putLike = (req, res) => {
     .populate('likes')
     .then((card) => {
       if (!card) {
-        return res.status(ERR_404).send(errorMessages.cardsLikes400);
+        next(new NotFoundError(errorMessages.cardsLikes400));
+      } else {
+        res.send({ data: card });
       }
-      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_400).send(errorMessages.cardsLikes400);
+        throw new NotValidDataError(errorMessages.cardsLikes400);
       }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 // Удаление лайка
-const removeLike = (req, res) => {
+const removeLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -77,16 +84,19 @@ const removeLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(ERR_404).send(errorMessages.cardsLikes400);
+        next(new NotFoundError(errorMessages.cardsLikes400));
+        // return res.status(ERR_404).send(errorMessages.cardsLikes400);
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_400).send(errorMessages.cardsLikes400);
+        throw new NotValidDataError(errorMessages.cardsLikes400);
+        // return res.status(ERR_400).send(errorMessages.cardsLikes400);
       }
-      return handleDefualtError(req, res);
-    });
+      throw new DefaultServerError(errorMessages.defaultMessage500);
+    })
+    .catch(next);
 };
 
 module.exports = {
