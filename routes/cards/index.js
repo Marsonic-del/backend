@@ -9,7 +9,7 @@ const {
 
 cards.get('/', getCards);
 cards.post('/', createCard);
-cards.delete('/:cardId', require('../../middlewares/checkCardOwner'), deleteCard);
+cards.delete('/:cardId', deleteCard);
 
 cards.put('/:cardId/likes', putLike);
 cards.delete('/:cardId/likes', removeLike);

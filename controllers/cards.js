@@ -3,6 +3,7 @@ const Card = require('../models/card');
 const { NotFoundError } = require('../errors/NotFoundError');
 const { NotValidDataError } = require('../errors/NotValidDataError');
 const { DefaultServerError } = require('../errors/DefaultServerError');
+const { ForbiddenError } = require('../errors/ForbiddenError');
 const { errorMessages } = require('../utils/constants');
 
 // Получаем все карточки
@@ -35,12 +36,22 @@ const createCard = (req, res, next) => {
 
 // Удаление карточки
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError(errorMessages.cardsDelete400));
+        return next(new NotFoundError(errorMessages.cardsDelete400));
       }
-      res.send({ message: 'Карточка удалена' });
+      if (JSON.stringify(card.owner) !== JSON.stringify(req.user._id)) {
+        return next(new ForbiddenError(errorMessages.cardsDelete403));
+      }
+      Card.findByIdAndRemove(card._id)
+        .then(() => {
+          res.send({ message: 'Карточка удалена' });
+        })
+        .catch(() => {
+          throw new DefaultServerError(errorMessages.defaultMessage500);
+        })
+        .catch(next);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -61,10 +72,9 @@ const putLike = (req, res, next) => {
     .populate('likes')
     .then((card) => {
       if (!card) {
-        next(new NotFoundError(errorMessages.cardsLikes400));
-      } else {
-        res.send({ data: card });
+        return next(new NotFoundError(errorMessages.cardsLikes400));
       }
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -84,15 +94,13 @@ const removeLike = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new NotFoundError(errorMessages.cardsLikes400));
-        // return res.status(ERR_404).send(errorMessages.cardsLikes400);
+        return next(new NotFoundError(errorMessages.cardsLikes400));
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new NotValidDataError(errorMessages.cardsLikes400);
-        // return res.status(ERR_400).send(errorMessages.cardsLikes400);
       }
       throw new DefaultServerError(errorMessages.defaultMessage500);
     })

@@ -46,7 +46,7 @@ const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        next(new NotValidDataError(errorMessages.usersIdGet));
+        return next(new NotValidDataError(errorMessages.usersIdGet));
       }
       return res.send({ data: user });
     })
@@ -69,7 +69,7 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Нет пользователя с таким id'));
+        return next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.send({ data: user });
     })
@@ -92,7 +92,7 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError(errorMessages.usersMeAvatarPatch404);
+        return next(new NotFoundError(errorMessages.usersMeAvatarPatch404));
       }
       return res.send({ data: user });
     })

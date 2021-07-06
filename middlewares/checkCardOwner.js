@@ -1,4 +1,4 @@
-const Card = require('../models/card');
+/* const Card = require('../models/card');
 const { NotFoundError } = require('../errors/NotFoundError');
 const { NotValidDataError } = require('../errors/NotValidDataError');
 const { ForbiddenError } = require('../errors/ForbiddenError');
@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
         next(new NotFoundError(errorMessages.cardsDelete400));
       }
       if (JSON.stringify(card.owner) !== JSON.stringify(req.user._id)) {
-        throw new ForbiddenError(errorMessages.cardsDelete403);
+        next(new ForbiddenError(errorMessages.cardsDelete403));
       }
     })
     .catch((err) => {
@@ -26,4 +26,4 @@ module.exports = (req, res, next) => {
     })
     .catch(next);
   next();
-};
+}; */
