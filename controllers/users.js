@@ -15,22 +15,24 @@ const createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
   bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => {
-      res.send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new NotValidDataError(errorMessages.usersPost400);
-      }
-      if (err.name === 'MongoError' && err.code === 11000) {
-        throw new ExistedEmailError(errorMessages.notValidEmail409);
-      }
-      throw new DefaultServerError(errorMessages.defaultMessage500);
-    })
-    .catch(next);
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => {
+          res.send({ data: user });
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            throw new NotValidDataError(errorMessages.usersPost400);
+          }
+          if (err.name === 'MongoError' && err.code === 11000) {
+            throw new ExistedEmailError(errorMessages.notValidEmail409);
+          }
+          throw new DefaultServerError(errorMessages.defaultMessage500);
+        })
+        .catch(next);
+    });
 };
 
 // Получение всех пользователей
