@@ -1,5 +1,6 @@
 const users = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const validUrl = require('../../controllers/validUrl');
 
 const {
   getUsers,
@@ -17,7 +18,7 @@ users.get('/me', getUserInfo);
 users.get('/:userId', celebrate({
   // валидируем параметры
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
+    userId: Joi.string().hex().length(24),
   }),
 }), getUserById);
 
@@ -31,7 +32,7 @@ users.patch('/me', celebrate({
 users.patch('/me/avatar', celebrate({
   // валидируем параметры
   body: Joi.object().keys({
-    avatar: Joi.string().required(),
+    avatar: Joi.string().required().custom(validUrl),
   }),
 }), updateAvatar);
 
