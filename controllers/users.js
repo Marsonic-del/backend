@@ -5,6 +5,7 @@ const { NotFoundError } = require('../errors/NotFoundError');
 const { NotValidDataError } = require('../errors/NotValidDataError');
 const { ExistedEmailError } = require('../errors/ExistedEmailError');
 const { DefaultServerError } = require('../errors/DefaultServerError');
+const { InvalidEmailOrPasswordError } = require('../errors/InvalidEmailOrPasswordError');
 const {
   SECRET_KEY, errorMessages,
 } = require('../utils/constants');
@@ -20,7 +21,12 @@ const createUser = (req, res, next) => {
         name, about, avatar, email, password: hash,
       })
         .then((user) => {
-          res.send({ data: user });
+          // eslint-disable-next-line no-param-reassign
+          user = user.toObject();
+          // eslint-disable-next-line no-param-reassign
+          delete user.password;
+          res.send(user);
+          // res.send({ data: user });
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
@@ -117,6 +123,7 @@ const login = (req, res, next) => {
       const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
       res.send({ token });
     })
+    .catch(() => { throw new InvalidEmailOrPasswordError(errorMessages.notValidEmailOrPassword); })
     .catch(next);
 };
 

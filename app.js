@@ -5,6 +5,7 @@ const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const routes = require('./routes');
 const { login, createUser } = require('./controllers/users');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 
@@ -20,6 +21,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(requestLogger); // подключаем логгер запросов
+
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
@@ -33,6 +36,8 @@ app.post('/signup', celebrate({
   }).unknown(true),
 }), createUser);
 app.use('/', require('./middlewares/auth'), routes);
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 // здесь обрабатываем все ошибки
 // обработчики ошибок
