@@ -22,6 +22,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(requestLogger); // подключаем логгер запросов
 
+app.use(require('./middlewares/cors'));
+
 app.post('/signin', require('./middlewares/cors'), celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
