@@ -38,7 +38,7 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(8),
   }).unknown(true),
 }), createUser);
-app.use('/', require('./middlewares/auth'), routes);
+app.use('/', cors, require('./middlewares/auth'), routes);
 
 app.use(errorLogger); // подключаем логгер ошибок
 
