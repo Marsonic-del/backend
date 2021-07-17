@@ -3,10 +3,10 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
+const cors = require('cors');
 const routes = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const cors = require('./middlewares/cors');
 
 const { PORT = 3000 } = process.env;
 
@@ -21,21 +21,22 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(cors());
 app.use(requestLogger); // подключаем логгер запросов
 
-app.post('/signin', cors(), celebrate({
+app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
 }), login);
-app.post('/signup', cors(), celebrate({
+app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }).unknown(true),
 }), createUser);
-app.use('/', cors(), require('./middlewares/auth'), routes);
+app.use('/', require('./middlewares/auth'), routes);
 
 app.use(errorLogger); // подключаем логгер ошибок
 
