@@ -3,7 +3,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
-const cors = require('cors');
+// const cors = require('cors');
+const cors = require('./middlewares/cors');
 const routes = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -32,7 +33,8 @@ app.post('/signin', cors(), celebrate({
   }),
 }), login);
 // app.options('/signup', cors());
-app.post('/signup', celebrate({
+app.use('/signup', cors());
+app.post('/signup', cors(), celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
