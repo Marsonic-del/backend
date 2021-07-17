@@ -21,11 +21,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-app.options('*', cors());
-app.use(cors());
 app.use(requestLogger); // подключаем логгер запросов
 
-app.options('/signin', cors());
+app.use(cors());
+app.options('*', cors());
+
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
