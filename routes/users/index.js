@@ -1,6 +1,7 @@
 const users = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const validUrl = require('../../controllers/validUrl');
+const cors = require('../../middlewares/cors');
 
 const {
   getUsers,
@@ -13,7 +14,7 @@ const {
 users.get('/', getUsers);
 
 // возвращает информацию о текущем пользователе
-users.get('/me', getUserInfo);
+users.get('/me', cors, getUserInfo);
 
 users.get('/:userId', celebrate({
   // валидируем параметры
