@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 // const cors = require('cors');
-const cors = require('./middlewares/cors');
+// const cors = require('./middlewares/cors');
 const routes = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -32,8 +32,9 @@ app.post('/signin', celebrate({
     password: Joi.string().required().min(8),
   }),
 }), login);
+
 // app.options('/signup', cors());
-app.post('/signup', cors(), celebrate({
+app.post('/signup', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
