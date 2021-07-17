@@ -1,6 +1,7 @@
 const users = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const validUrl = require('../../controllers/validUrl');
+// const cors = require('../../middlewares/cors');
 
 const {
   getUsers,
