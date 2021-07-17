@@ -1,21 +1,24 @@
-const cors = (req, res, next) => {
+const allowedCors = [
+  'https://mymesto.vladimir.nomoredomains.work',
+  'localhost:3000',
+];
+const DEFAULT_ALLOWED_METHODS = 'OPTIONS,GET,HEAD,PUT,PATCH,POST,DELETE';
+
+module.exports = (req, res, next) => {
+  const { origin } = req.headers;
+  const { method } = req;
   const requestHeaders = req.headers['access-control-request-headers'];
-  const { method } = req; // Сохраняем тип запроса (HTTP-метод) в соответствующую переменную
 
-  // Значение для заголовка Access-Control-Allow-Methods по умолчанию (разрешены все типы запросов)
-  const DEFAULT_ALLOWED_METHODS = 'OPTIONS,GET,HEAD,PUT,PATCH,POST,DELETE';
+  if (allowedCors.includes(origin)) {
+    // устанавливаем заголовок, который разрешает браузеру запросы с этого источника
+    res.header('Access-Control-Allow-Origin', origin);
+  }
 
-  // устанавливаем заголовок, который разрешает браузеру запросы из любого источника
-  res.header('Access-Control-Allow-Origin', '*');
-
-  // Если это предварительный запрос, добавляем нужные заголовки
   if (method === 'OPTIONS') {
     // разрешаем кросс-доменные запросы любых типов (по умолчанию)
     res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
     // разрешаем кросс-доменные запросы с этими заголовками
     res.header('Access-Control-Allow-Headers', requestHeaders);
-    res.header('Access-Control-Allow-Origin', '*');
   }
-  next(); // пропускаем запрос дальше
+  next();
 };
-module.exports = cors;
