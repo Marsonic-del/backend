@@ -11,6 +11,7 @@ const cors = require('./middlewares/cors');
 const { PORT = 3000 } = process.env;
 
 const app = express();
+app.use(cors());
 
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
@@ -21,8 +22,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
-
-app.use(cors());
 
 app.use(requestLogger); // подключаем логгер запросов
 
