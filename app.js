@@ -11,7 +11,6 @@ const cors = require('./middlewares/cors');
 const { PORT = 3000 } = process.env;
 
 const app = express();
-app.use(cors());
 
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
@@ -25,19 +24,19 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(requestLogger); // подключаем логгер запросов
 
-app.post('/signin', celebrate({
+app.post('/signin', cors(), celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
 }), login);
-app.post('/signup', celebrate({
+app.post('/signup', cors(), celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }).unknown(true),
 }), createUser);
-app.use('/', require('./middlewares/auth'), routes);
+app.use('/', cors(), require('./middlewares/auth'), routes);
 
 app.use(errorLogger); // подключаем логгер ошибок
 
