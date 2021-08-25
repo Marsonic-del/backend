@@ -1,6 +1,7 @@
 const allowedCors = [
   'https://mymesto.vladimir.nomoredomains.work',
-  'localhost:3000',
+  'http://mymesto.vladimir.nomoredomains.work',
+  'http://localhost:3000',
 ];
 const DEFAULT_ALLOWED_METHODS = 'OPTIONS,GET,HEAD,PUT,PATCH,POST,DELETE';
 

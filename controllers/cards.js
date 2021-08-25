@@ -9,6 +9,7 @@ const { errorMessages } = require('../utils/constants');
 // Получаем все карточки
 const getCards = (req, res, next) => {
   Card.find({})
+    .populate('likes')
     .then((card) => res.send({ data: card }))
     .catch(() => { throw new DefaultServerError(errorMessages.defaultMessage500); })
     .catch(next);
